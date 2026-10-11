@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+
+/*
+ * Golden Gate design tokens, taken from the Figma exports (colors, radii, gradients are the values in
+ * the SVGs, not approximations). The UI is laid out on a fixed 1920×1080 stage (see Stage.tsx), so
+ * every pixel value below is a design pixel.
+ */
+@theme {
+  --color-night-950: #03041a;
+  --color-night-900: #070a2b;
+  --color-night-800: #0e1125;
+  --color-night-700: #151a3d;
+
+  --color-gold: #ffaa00;
+  --color-gold-soft: #ffc24d;
+  --color-gold-deep: #d98c00;
+  --color-lavender: #999bff;
+  --color-lavender-soft: #b9baff;
+  --color-lavender-dim: #7f83d6;
+  --color-ok: #2ecf6e;
+  --color-alarm: #ef4444;
+  --color-alarm-soft: #ff6b6b;
+
+  --color-ink: #ffffff;
+  --color-ink-2: #d8d9f0;
+  --color-ink-3: #9a9cc0;
+  --color-ink-4: #6d7098;
+
+  --font-ui: 'Oxanium', 'Segoe UI', system-ui, sans-serif;
+  --font-brand: 'Montserrat', 'Segoe UI', sans-serif;
+  --font-plain: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  --animate-spin-slow: spin 14s linear infinite;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    background: #03041a;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--font-ui);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  button {
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+
+  input {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* Card: 12px radius, charcoal gradient at 40%, top-lit border fading downwards (Figma paint19/20). */
+  .gg-panel {
+    position: relative;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(37, 37, 37, 0.4) 0%, rgba(59, 59, 59, 0) 100%);
+  }
+  .gg-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, #8b8b8b 0%, rgba(37, 37, 40, 0) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .gg-gold-text {
+    color: var(--color-gold);
+    text-shadow: 0 0 18px rgba(255, 170, 0, 0.35);
+  }
+
+  .gg-scroll {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(153, 155, 255, 0.35) transparent;
+  }
+}
+
+/* Shared motion. */
+@keyframes gg-pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes gg-alarm-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes gg-dash {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes gg-glow-drift {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.08);
+  }
+}
+
+@keyframes gg-scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -21,7 +21,7 @@ export function TopBar() {
         <Wordmark />
       </div>
 
-      <nav className="absolute left-[404px] top-[28px] flex" aria-label="Systems">
+      <nav className="absolute left-1/2 top-[28px] flex -translate-x-1/2" aria-label="Systems">
         {SYSTEMS.map((s) => (
           <NavOrb
             key={s.id}

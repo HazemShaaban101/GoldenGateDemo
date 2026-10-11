@@ -140,7 +140,6 @@ export const SYSTEMS: SystemDef[] = [
       { id: 'advertising', label: 'Advertising' },
       { id: 'analytics', label: 'Analytics' },
       { id: 'feeds', label: 'Data Feeds' },
-      { id: 'sync-log', label: 'Sync Log' },
     ],
   },
 ];

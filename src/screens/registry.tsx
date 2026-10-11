@@ -51,5 +51,4 @@ export const SCREENS: Record<string, Screen> = {
   'integration/business': named(integration, 'BusinessScreen'),
   'integration/advertising': named(integration, 'AdvertisingScreen'),
   'integration/analytics': named(integration, 'AnalyticsScreen'),
-  'integration/sync-log': named(integration, 'SyncLogScreen'),
 };

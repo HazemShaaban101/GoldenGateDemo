@@ -25,8 +25,6 @@ export interface Feed {
   rate: Pick<SignalDef, 'low' | 'high' | 'profile'>;
   /** Typical delivery latency (ms) between the source event and the CRM acknowledging it. */
   latency: number;
-  /** Example endpoints used in the sync log. */
-  endpoints: string[];
 }
 
 export const FEEDS: Feed[] = [
@@ -40,7 +38,6 @@ export const FEEDS: Feed[] = [
     route: '/security/parking',
     rate: { low: 12, high: 210, profile: 'occupancy' },
     latency: 420,
-    endpoints: ['/parking/plate-reads', '/parking/occupancy', '/parking/sessions'],
   },
   {
     id: 'access',
@@ -52,7 +49,6 @@ export const FEEDS: Feed[] = [
     route: '/security/access',
     rate: { low: 20, high: 260, profile: 'office' },
     latency: 310,
-    endpoints: ['/access/events', '/access/zones', '/access/credentials'],
   },
   {
     id: 'cctv',
@@ -64,7 +60,6 @@ export const FEEDS: Feed[] = [
     route: '/security/cctv',
     rate: { low: 300, high: 900, profile: 'occupancy' },
     latency: 780,
-    endpoints: ['/analytics/footfall', '/analytics/heatmaps', '/analytics/trajectories'],
   },
   {
     id: 'bms',
@@ -76,7 +71,6 @@ export const FEEDS: Feed[] = [
     route: '/hvac/environmental',
     rate: { low: 440, high: 520, profile: 'hvac' },
     latency: 640,
-    endpoints: ['/bms/zones', '/bms/air-quality', '/bms/equipment'],
   },
   {
     id: 'energy',
@@ -88,7 +82,6 @@ export const FEEDS: Feed[] = [
     route: '/metering/energy',
     rate: { low: 110, high: 130, profile: 'flat' },
     latency: 560,
-    endpoints: ['/metering/energy', '/metering/water', '/metering/ev-sessions'],
   },
   {
     id: 'fm',
@@ -100,7 +93,6 @@ export const FEEDS: Feed[] = [
     route: '/maintenance/ticketing',
     rate: { low: 1, high: 14, profile: 'office' },
     latency: 350,
-    endpoints: ['/fm/work-orders', '/fm/assets', '/fm/sla'],
   },
   {
     id: 'beacons',
@@ -112,7 +104,6 @@ export const FEEDS: Feed[] = [
     route: '/community/crowd',
     rate: { low: 80, high: 1800, profile: 'occupancy' },
     latency: 260,
-    endpoints: ['/beacons/proximity', '/beacons/impressions', '/beacons/dwell'],
   },
   {
     id: 'signage',
@@ -124,7 +115,6 @@ export const FEEDS: Feed[] = [
     route: '/community/navigation',
     rate: { low: 30, high: 120, profile: 'retail' },
     latency: 470,
-    endpoints: ['/signage/proof-of-play', '/signage/screens'],
   },
   {
     id: 'av',
@@ -135,7 +125,6 @@ export const FEEDS: Feed[] = [
     status: 'commissioning',
     rate: { low: 2, high: 40, profile: 'office' },
     latency: 900,
-    endpoints: ['/rooms/state', '/rooms/av-status'],
   },
 ];
 

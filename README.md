@@ -2,8 +2,8 @@
 
 > **Current build:** runs on its own equipment data (no gateway or Galaxy needed) behind a local sign-in
 > (`administrator` / `000000`, see `src/gateway/auth.ts`). The **Integration** system (`src/screens/integration`,
-> `src/model/integration.ts`) shows the hand-off to the CRM: feed status, delivery KPIs, use-case data coverage and
-> the delivery log. The sections below describe the earlier gateway-backed build, which this version replaces.
+> `src/model/integration.ts`) shows the hand-off to the CRM: feed status, delivery KPIs and a KPI
+> dashboard for each use case. The sections below describe the earlier gateway-backed build, which this version replaces.
 >
 > Run: `npm install`, `npm run dev` (port 5180) or `npm run build && npm run preview` (port 5181).
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Panel } from '@/components/frame/Panel';
 import { LinkIcon } from '@/components/icons/UiIcons';
-import { clockTime, DataTable, Meter, Tag } from '@/components/data/DataTable';
+import { DataTable, Tag } from '@/components/data/DataTable';
 import { KeyValues, KpiBody } from '@/widgets/Widgets';
 import { useSource } from '@/widgets/source';
 import { TrendCard } from '@/widgets/TrendCard';
@@ -9,7 +9,6 @@ import { row, stack } from '@/screens/layout';
 export { MobilityScreen, FacilityScreen, LifestyleScreen, BusinessScreen, AdvertisingScreen, AnalyticsScreen } from '@/screens/integration/ChannelDashboard';
 import { signal } from '@/sim/catalog';
 import { useNow } from '@/sim/clock';
-import { pickFrom, useEventCountToday, useEventStream, type StreamSpec } from '@/sim/events';
 import {
   CONSUMERS,
   FEEDS,
@@ -19,21 +18,8 @@ import {
   recordsToday,
   useCaseLive,
   type Feed,
-  type FeedId,
 } from '@/model/integration';
 import { fmt } from '@/utils/format';
-
-const SHORT_FEED: Record<FeedId, string> = {
-  lpr: 'LPR',
-  access: 'Access',
-  cctv: 'CCTV',
-  bms: 'BMS',
-  energy: 'Metering',
-  fm: 'Tickets',
-  beacons: 'Beacons',
-  signage: 'Signage',
-  av: 'Rooms & AV',
-};
 
 const liveFeeds = FEEDS.filter((f) => f.status === 'live').length;
 
@@ -221,98 +207,6 @@ export function FeedsScreen() {
       </Panel>
       <TrendCard frame={bottom[0]} index={1} icon={icon} title="Throughput" subtitle="All feeds, records per minute" sim="integration.records" names={{ actual: 'Actual', predictive: 'Expected' }} yTitle="Records / min" decimals={0} dayHours={12} />
       <TrendCard frame={bottom[1]} index={2} icon={icon} title="Delivery Latency" subtitle="Site event to CRM acknowledgement" sim="integration.latency" names={{ actual: 'Actual', predictive: 'Expected' }} yTitle="Latency (ms)" decimals={0} dayHours={12} />
-    </>
-  );
-}
-
-/* =================================================================================================
- * Sync log
- * ================================================================================================= */
-
-type Delivery = { feed: Feed; endpoint: string; records: number; latency: number; result: 'delivered' | 'retried' | 'failed'; detail: string };
-
-const SENDING = FEEDS.filter((f) => f.status === 'live');
-const FAILURES = ['CRM returned 503', 'Timed out after 10 s', 'Schema rejected: unknown tenant id'] as const;
-
-const SYNC: StreamSpec<Delivery> = {
-  id: 'integration.sync',
-  peakPerHour: 420,
-  profile: 'occupancy',
-  make: (_k, rnd) => {
-    const feed = pickFrom(SENDING, rnd(1));
-    const r = rnd(5);
-    const result = r < 0.0015 ? 'failed' : r < 0.045 ? 'retried' : 'delivered';
-    return {
-      feed,
-      endpoint: pickFrom(feed.endpoints, rnd(2)),
-      records: Math.max(1, Math.round(3 + rnd(3) * (feed.rate.high / 6))),
-      latency: Math.round(feed.latency * (0.6 + rnd(4) * 0.9) * (result === 'delivered' ? 1 : 2.6)),
-      result,
-      detail: result === 'failed' ? pickFrom(FAILURES, rnd(6)) : result === 'retried' ? `Acknowledged on attempt ${2 + Math.floor(rnd(7) * 2)}` : 'Acknowledged',
-    };
-  },
-};
-
-const RESULT_TONE = { delivered: 'good', retried: 'warn', failed: 'bad' } as const;
-
-export function SyncLogScreen() {
-  const events = useEventStream(SYNC, 40, 3 * 3_600_000);
-  const total = useEventCountToday(SYNC);
-  const retried = useEventCountToday(SYNC, (d) => d.result === 'retried');
-  const failed = useEventCountToday(SYNC, (d) => d.result === 'failed');
-  const kpis = row(208, 150, 4);
-  const [table, side] = row(383, 595, [1180, 611]);
-  const [trend, byFeed] = stack(side.x, side.w, 383, [285, 285]);
-  const icon = <LinkIcon />;
-  const counts = SENDING.map((f) => ({ f, n: events.filter((e) => e.data.feed.id === f.id).length })).sort((a, b) => b.n - a.n);
-  const top = Math.max(1, ...counts.map((c) => c.n));
-
-  return (
-    <>
-      <Panel frame={kpis[0]} index={0} icon={icon} title="Batches Today" subtitle="Sent to the CRM">
-        <KpiBody source={{ fixed: total }} decimals={0} unit="" note="Each batch carries many records" />
-      </Panel>
-      <Panel frame={kpis[1]} index={1} icon={icon} title="Acknowledged" subtitle="Accepted by the CRM">
-        <KpiBody source={{ fixed: total ? ((total - failed) / total) * 100 : 100 }} decimals={2} unit="%" note={`${total - failed - retried} first time`} />
-      </Panel>
-      <Panel frame={kpis[2]} index={2} icon={icon} title="Retried" subtitle="Recovered automatically">
-        <KpiBody source={{ fixed: retried }} decimals={0} unit="" note="Buffered, then redelivered" />
-      </Panel>
-      <Panel frame={kpis[3]} index={3} icon={icon} title="Failed" subtitle="Held for replay">
-        <KpiBody source={{ fixed: failed }} decimals={0} unit="" note={failed ? <Tag tone="bad">Needs attention</Tag> : 'None'} />
-      </Panel>
-
-      <Panel frame={table} index={4} icon={icon} title="Delivery Log" subtitle="Every batch handed to the CRM, newest first">
-        <div className="absolute inset-x-[4px] bottom-[10px] top-[8px]">
-          <DataTable
-            dense
-            rows={events}
-            rowKey={(e) => e.key}
-            highlight={(e) => (e.data.result === 'failed' ? 'alarm' : null)}
-            columns={[
-              { key: 't', header: 'Time', width: 100, render: (e) => <span className="tabular-nums text-ink-2">{clockTime(e.t)}</span> },
-              { key: 'feed', header: 'Feed', width: 190, render: (e) => <span className="text-white">{e.data.feed.name}</span> },
-              { key: 'ep', header: 'Endpoint', width: 200, render: (e) => <span className="font-mono text-[13px] text-ink-2">{e.data.endpoint}</span> },
-              { key: 'rec', header: 'Records', width: 90, align: 'right', render: (e) => e.data.records },
-              { key: 'lat', header: 'Latency', width: 90, align: 'right', render: (e) => `${e.data.latency} ms` },
-              { key: 'res', header: 'Result', width: 120, render: (e) => <Tag tone={RESULT_TONE[e.data.result]}>{e.data.result[0].toUpperCase() + e.data.result.slice(1)}</Tag> },
-              { key: 'd', header: 'Detail', render: (e) => <span className="text-ink-3">{e.data.detail}</span> },
-            ]}
-          />
-        </div>
-      </Panel>
-      <TrendCard frame={trend} index={5} icon={icon} title="Queue Depth" subtitle="Messages waiting to be delivered" sim="integration.queue" names={{ actual: 'Actual', predictive: 'Expected' }} yTitle="Messages" decimals={0} dayHours={12} />
-      <Panel frame={byFeed} index={6} icon={icon} title="Recent Batches By Feed" subtitle="Last 40 batches">
-        <div className="absolute inset-x-[20px] top-[6px] flex flex-col gap-[7px]">
-          {counts.slice(0, 7).map(({ f, n }) => (
-            <div key={f.id} className="flex items-center justify-between text-[14px]">
-              <span className="w-[170px] text-white">{SHORT_FEED[f.id]}</span>
-              <Meter value={(n / top) * 100} tone="info" width={250} />
-              <span className="w-[56px] text-right tabular-nums text-ink-3">{n}</span>
-            </div>
-          ))}
-        </div>
-      </Panel>
     </>
   );
 }

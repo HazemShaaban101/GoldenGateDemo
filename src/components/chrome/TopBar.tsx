@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavOrb } from '@/components/chrome/NavOrb';
 import { Wordmark } from '@/components/chrome/Wordmark';
+import { BrandLogos } from '@/components/chrome/BrandLogos';
 import { NotificationBell } from '@/components/chrome/NotificationBell';
 import { ClockIcon, CloudSunIcon } from '@/components/icons/UiIcons';
 import { SYSTEMS, systemPath } from '@/model/navigation';
@@ -17,7 +18,8 @@ export function TopBar() {
 
   return (
     <header className="absolute inset-x-0 top-0 z-30 h-[150px]">
-      <div className="absolute left-[72px] top-[56px]">
+      <div className="absolute left-[72px] top-[22px] flex flex-col items-center gap-[20px]">
+        <BrandLogos height={30} withAcs />
         <Wordmark />
       </div>
 

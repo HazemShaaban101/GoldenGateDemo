@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import campus from '@/assets/renders/campus.webp';
 import { Wordmark } from '@/components/chrome/Wordmark';
+import { BrandLogos, DeliveredBy } from '@/components/chrome/BrandLogos';
 import { useAuth } from '@/gateway/auth';
 import { GatewayError } from '@/gateway/client';
 import { useNow } from '@/sim/clock';
@@ -62,6 +63,9 @@ export function LoginPortal() {
         style={{ background: 'linear-gradient(180deg, rgba(20,22,52,0.82), rgba(10,11,32,0.88))', backdropFilter: 'blur(14px)' }}
       >
         <GoldCorners />
+        <div className="mb-[34px] flex justify-center">
+          <BrandLogos height={40} />
+        </div>
         <h1 className="text-[34px] leading-none text-white">Welcome</h1>
         <p className="mt-[12px] text-[17px] text-[#8f91b5]">Sign in to enter the platform.</p>
 
@@ -141,6 +145,9 @@ export function PortalBackdrop({ children }: { children: ReactNode }) {
       <div className="absolute right-[72px] top-[56px] text-right">
         <p className="text-[17px] tabular-nums text-white">{now.toLocaleTimeString('en-US')}</p>
         <p className="mt-[8px] text-[16px] text-ink-3">IoT Platform · Cairo, Egypt</p>
+      </div>
+      <div className="absolute bottom-[40px] left-[72px]">
+        <DeliveredBy />
       </div>
       <p className="absolute bottom-[40px] left-1/2 -translate-x-1/2 text-[14px] tracking-[2px] text-ink-4">CCTV · ACCESS CONTROL · PARKING · NAVIGATION · BMS · PLC</p>
       {children}
